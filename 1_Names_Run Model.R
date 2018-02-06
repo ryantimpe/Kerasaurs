@@ -48,7 +48,8 @@ result_df <- result %>%
   data_frame(kerasaur = .) %>%
   distinct %>%
   filter(!is.na(kerasaur), kerasaur != "") %>%
-  anti_join(data_frame(kerasaur = kerasaurs), by="kerasaur") # remove plates that are already actual banned plates
+  anti_join(data_frame(kerasaur = kerasaurs), by="kerasaur") %>%  # remove actual animals
+  mutate(kerasaur = tools::toTitleCase(kerasaur))
 
 
 write.csv(result_df, "2_Names_Output.csv", row.names = F, quote = F)
