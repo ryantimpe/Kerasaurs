@@ -37,10 +37,10 @@ vectors <- vectorize(data, characters, max_length)
 model <- create_model(characters, max_length)
 
 # iterate the model
-iterate_model(model, characters, max_length, diversity, vectors, 40)
+iterate_model(model, characters, max_length, diversity, vectors, 50)
 
 # create the result
-result <- 
+result2 <- 
   runif(250,0.2,0.8) %>% #randomly choose diversity for each plate
   map_chr(~ generate_saur(model, characters, max_length, .x))
 
