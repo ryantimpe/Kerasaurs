@@ -3,6 +3,7 @@
 #####
 
 library(tidyverse)
+library(png)
 
 ###
 #Which PhyloPic image is closest in name to the Kerasaur
@@ -47,3 +48,50 @@ dat_chart <- dat_dist %>%
 ####
 # Import the phylo pic
 ####
+
+import_phylo <- function(phylo_name, height = 50){
+  phylo_raw <- readPNG(paste0("PhyloPic/", phylo_name, ".png"))
+  
+  phylo <- phylo_raw[, , 4] #Only need the transparency matrix
+  
+  #Reduce resolution to a smaller matrix
+  width.to.height = nrow(phylo) / ncol(phylo)
+  
+  mcol <- ceiling(ncol(phylo)/height * width.to.height)
+  mrow <- ceiling(nrow(phylo)/height)
+  
+  phylo2 <- phylo %>% 
+    as.tibble() %>% 
+    mutate(y = row_number()) %>% 
+    select(y, everything()) %>% 
+    gather(x, value, 2:ncol(.)) %>% 
+    mutate(x = as.numeric(substr(x, 2, 8))) %>% 
+    group_by(x = x %/% mcol, y= y %/% mrow) %>% 
+    summarize(value = mean(value)) %>% 
+    ungroup() %>% 
+    mutate(y = max(y) - y) %>% 
+    filter(value > 0)
+}
+
+import_phylo("Utahraptor") %>% 
+  ggplot(aes(x = x, y = y, alpha = value)) +
+  geom_raster(fill = "blue") +
+  coord_fixed()
+
+dat_chart2 <- dat_chart %>% 
+  mutate(phylo_pic = purrr::map(phylo, import_phylo))
+
+test <- dat_chart2 %>% 
+  unnest()
+
+
+####
+# Phylo tree
+####
+
+dat_phylo <- dat_chart
+
+dat_phylo %>% 
+  ggplot(aes(x = tree_x, y = tree_y)) + 
+  geom_point() +
+  geom_label(aes(label = kerasaur))
