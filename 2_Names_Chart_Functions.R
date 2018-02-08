@@ -132,11 +132,11 @@ generate_tree <- function(dat_phylo, phylo_resolution){
     scale_fill_gradient(high = fill_grad[1], low = fill_grad[2]) +
     geom_label(aes(label = kerasaur), 
                nudge_x = (y_set), nudge_y = (-y_set/3), alpha = 0.75,
-               fontface = "bold") +
+               fontface = "bold", size = 2.5) +
     scale_x_continuous(breaks = x_time, labels = x_axis, name = "million years ago") + 
     coord_fixed(xlim = c(y_set*2, y_set*20)) +
     labs(title = paste(clade_name, "phylogenetic tree"),
-         subtitle = "Deep learning dinosaur names using keras",
+         subtitle = "Deep learning dinosaur names using Keras",
          caption = "@RyanTimpe .com") +
     theme_bw() +
     theme(
