@@ -1,3 +1,9 @@
+---
+title: "Kersaurs"
+author: Ryan Timpe
+output: md_document
+---
+
 # Kerasaurs
 
 Using [keras](https://keras.rstudio.com/index.html) deep learning package in R to generate new prehistoric animal names from a list of existing genera.
@@ -7,11 +13,11 @@ Heavily adapted from functions written by [Jonathan Nolis](https://github.com/jn
 
 ## Ouput
 
-Proposed genus names from 40 iterations of modeling. From 250 samples, 180 unique names were generated, 71 were not previously named dinosaurs, mosasaurs, ichthyosaurs, or plesiosaurs.
+Proposed genus names from 50 iterations of modeling. From 500 samples, 312 unique names were generated, 120 were not previously named dinosaurs, pterosaurs, mosasaurs, ichthyosaurs, or plesiosaurs.
 
 ```{r, echo = FALSE, message=FALSE}
 library(dplyr)
-kerasaurs <- read.csv("2_Names_Output.csv", stringsAsFactors = FALSE) %>% 
+kerasaurs <- read.csv("2_Names_Output_ptero.csv", stringsAsFactors = FALSE) %>% 
   arrange(kerasaur)
 
 knitr::kable(kerasaurs)
@@ -20,5 +26,7 @@ knitr::kable(kerasaurs)
 
 ## Input data
 
-* Lists of [dinosaur](https://en.wikipedia.org/wiki/List_of_dinosaur_genera) genera, [mosasaur genera](https://en.wikipedia.org/wiki/List_of_mosasaur_genera), [ichthyosaur](https://en.wikipedia.org/wiki/List_of_ichthyosaur_genera) genera, and [plesiosaur](https://en.wikipedia.org/wiki/List_of_plesiosaur_genera) genera from Wikipedia.
+* Lists of [dinosaur](https://en.wikipedia.org/wiki/List_of_dinosaur_genera) genera, [pterosaur](https://en.wikipedia.org/wiki/List_of_pterosaur_genera) genera, [mosasaur](https://en.wikipedia.org/wiki/List_of_mosasaur_genera) genera, [ichthyosaur](https://en.wikipedia.org/wiki/List_of_ichthyosaur_genera) genera, and [plesiosaur](https://en.wikipedia.org/wiki/List_of_plesiosaur_genera) genera from Wikipedia.
+
+* Images from [PhyloPic.org](http://phylopic.org/image/browse/)
 

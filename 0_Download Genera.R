@@ -2,10 +2,13 @@
 # Download list of genera
 ####
 
-library(tidyverse)
+library(tidyverse); library(rvest)
 
 url_dino     <- "https://en.wikipedia.org/wiki/List_of_dinosaur_genera"
 dat_raw_dino <- read_html(url_dino)
+
+url_ptero     <- "https://en.wikipedia.org/wiki/List_of_pterosaur_genera"
+dat_raw_ptero <- read_html(url_ptero)
 
 url_mosa     <- "https://en.wikipedia.org/wiki/List_of_mosasaur_genera"
 dat_raw_mosa <- read_html(url_mosa)
@@ -22,6 +25,16 @@ dino_genera_raw <- dat_raw_dino %>%
   html_text() 
 
 dino_genera <- unique(dino_genera_raw[!grepl("nomen |nomina ", tolower(dino_genera_raw))])
+
+#Mosasaurs
+ptero_genera_raw <- dat_raw_ptero %>% 
+  html_nodes("tr td p i") %>% 
+  html_text() 
+
+ptero_genera <- unique(ptero_genera_raw)
+ptero_genera <- ptero_genera[!grepl(".", ptero_genera, fixed=TRUE)]
+ptero_genera <- ptero_genera[!grepl(" ", ptero_genera, fixed=TRUE)]
+ptero_genera <- ptero_genera[!grepl("-", ptero_genera, fixed=TRUE)]
 
 #Mosasaurs
 mosa_genera_raw <- dat_raw_mosa %>% 
@@ -48,7 +61,7 @@ plesio_genera <- unique(plesio_genera_raw)
 plesio_genera <- plesio_genera[!grepl(".", plesio_genera, fixed=TRUE)]
 
 #Combined
-kerasaurs <- c(dino_genera, mosa_genera, ichthy_genera, plesio_genera)
+kerasaurs <- c(dino_genera, ptero_genera, mosa_genera, ichthy_genera, plesio_genera)
 kerasaurs <- kerasaurs[!grepl(" ", kerasaurs, fixed=TRUE)]
 
 kerasaurs <- kerasaurs[nchar(kerasaurs) >= 8]
