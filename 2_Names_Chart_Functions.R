@@ -121,7 +121,7 @@ generate_tree <- function(dat_phylo, phylo_resolution){
     filter(tree_x == 1) %>% 
     pull(kerasaur)
   
-  fill_complement <- sample(c("#ff4040", "#2dd49c", "#5384ff", "#ff25ab"), 1)
+  fill_complement <- sample(c("#ff4040", "#2dd49c", "#5384ff", "#ff25ab", "#ff6141", "#ff9e53"), 1)
   fill_grad <- sample(c(fill_complement, "#00436b"), 2, replace = FALSE)
   
   dat_phylo %>% 
