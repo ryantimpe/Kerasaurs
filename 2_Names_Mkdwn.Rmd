@@ -27,48 +27,54 @@ phylo <- phylo[!(phylo %in% c("Hyaenodon", "Camelus ferus", "Coelodonta antiquit
 
 ### Deep learning with Keras
 
-I'm setting out to learn deep learning using the [keras](https://keras.rstudio.com/index.html) package for R. I'm excited to learn the theory and understand the guts of TensorFlow, but while I was waiting for [the book](https://www.amazon.com/Deep-Learning-R-Francois-Chollet/dp/161729554X) to be delivered, I decided to get hands-on with a simple model. I decided it would be nice to have a model that I can work with as I learn the finer details of the hyperparameters.
+RStudio just released a [new package](https://blog.rstudio.com/2018/02/06/tensorflow-for-r/) and [new book](https://www.amazon.com/Deep-Learning-R-Francois-Chollet/dp/161729554X) for neural networks and machine learning in R. I'm super excited to learn all of the finer details of [TensorFlow and Keras](https://keras.rstudio.com/index.html), but I'm also a bit impatient.
+
+For better or worse, I decided to jump (mostly) blind-folded into the package and see what I can produce.
 
 ### The Goal
 
-If you haven't noticed already, my brand is dinosaurs (and divas). So... **Can I build a deep learning to develop new dinosaur names?**
+If you haven't noticed already, my brand is dinosaurs (and divas). So... **Can I train a deep learning model to develop new dinosaur names?**
 
 ### The Data
 
-I trained the model on `r length(saurs)` genus names of dinosaurs, pterosaurs, mosasaurs, ichthyosaurs, and plesiosaurs. The latter 3 are not dinosaurs, but I wanted to increase my training data set to include more extinct _saurs.
+I trained a model using `r length(saurs)` genus names of dinosaurs, pterosaurs, mosasaurs, ichthyosaurs, and plesiosaurs. The latter 4 are not dinosaurs, but I wanted to increase my training data set to include more extinct "saurs".
 
-I also have a database of `r length(phylo)` [silhouette images](https://github.com/ryantimpe/datasaurs/tree/master/PhyloPic) of dinosaurs and other animals from my [Datasaurs](https://twitter.com/datasaurs) Twitter bot. These will be useful later in this post, as well as future deep learning projects.
+I also have a database of `r length(phylo)` [silhouette images](https://github.com/ryantimpe/datasaurs/tree/master/PhyloPic) of dinosaurs and other animals from [PhyloPic](http://phylopic.org/image/browse/). I already had these collected from my work on the [Datasaurs](https://twitter.com/datasaurs) Twitter bot.
 
 ### The Model
 
 #### Developers
 
-I had it easy for this project. [Jonathon Nolis](https://twitter.com/skyetetra) published his project to come up with [offensive license plates](https://towardsdatascience.com/using-deep-learning-to-generate-offensive-license-plates-619b163ed937) in Arizona. He based his work off of the Keras example creating new [text based off Nietzsche’s writing](https://keras.rstudio.com/articles/examples/lstm_text_generation.html). He figured out that predicting letters from license plates isn't much different than predicting words from tomes. The next logical step from Nietzche and license plates is, of course, dinosaur names.
+I had it easy for this project. [Jonathan Nolis](https://twitter.com/skyetetra) published his project to generate [offensive license plates](https://towardsdatascience.com/using-deep-learning-to-generate-offensive-license-plates-619b163ed937) that would be banned in Arizona. He based his work off of the Keras example creating new [text based off Nietzsche’s writing](https://keras.rstudio.com/articles/examples/lstm_text_generation.html). Jonathan figured out that predicting letters from license plates isn't much different than predicting words from tomes. Generating new dinosaurs names was the next logical step, of course.
 
 #### An Explanation
 
-Those references lay out the logic and inner workings of the model in much more detail than I will here (as I said, I'm still a beginner with Deep Learning). The algorithm primarily used for text prediction is [Recurrent Neural Networks (RNN)](https://medium.com/datalogue/attention-in-keras-1892773a4f22). Given a string a characters (or words), the algorithm chooses the next character (or word) based off the distribution of those sequences in the training data.
+The links above lay out the logic and inner workings of the model in much more detail than I will here (as I said, I'm still a beginner with deep learning and neural networks). The algorithm used here for text prediction is [Recurrent Neural Networks (RNN)](https://medium.com/datalogue/attention-in-keras-1892773a4f22). Given a string a characters (or words), the algorithm chooses the next character (or word) based off the distribution of those sequences in the training data.
 
-In my case, the training data is the list of those `r length(saurs)` extinct bird/reptile names. As you can imagine, the sequence "...saur..." shows up many times in that list.[^saurs] During the generation of a new dinosaur name, assume the model iteration is current at "Brontosaur" and the model is about a pick a new letter. There are 27 possible options for the model to choose from: the 26 letters of the alphabet and the option for the model to stop adding letters. However, those 27 options are not equally likely - with the probabilities coming from the training data.
+In this case, the training data is the list of those `r length(saurs)` extinct animal names. As you can imagine, among these names, the sequence "...saur..." shows up many times in that list.[^saurs] 
+
+When the model is generating a new name, it has an intermediate sequence of letters that begin the name, and needs to add a letter. Assume the model iteration is currently at "Grontosaur" and it is about a pick a new letter. There are 27 possible options for the model to choose from: the 26 letters of the alphabet and the option for the model to stop adding letters. However, those 27 options are not equally likely - the probability of each one comes from the training data.
 
 [^saurs]: Exactly `r length(kerasaurs[grepl("saur", saurs)])` of the `r length(saurs)` training animals contain the string "saur" in the name.
 
-Below, is a simplified illustration of the Brontosaur example. Rather than 27 options for a next letter, assume there are only 4 possible letters and a stop character. Again, the "u" is the most likely letter.
+Below, is a simplified illustration of the Grontosaur example. Rather than 27 options for a next letter, assume there are only 4 possible letters and a stop character. Selecting the "u" as the next letter is the most likely scenario, followed by "a" or "(stop)".
 
 ```{r brontosaur, echo=FALSE, message=FALSE, warning=FALSE}
 base_prob <- c(1.5, .4, .2, .2, .4)
 saur_completion <- tibble(`Next Letter` = c("u", "a", "i", "o", "(stop)"),
                           `Probability` = round(exp(base_prob)/sum(exp(base_prob)),2))
 
-knitr::kable(saur_completion, "html", caption = "Probability of next letter after 'brontosaur'") %>%
+knitr::kable(saur_completion, "html", caption = "Probability of next letter after 'grontosaur'") %>%
   kable_styling(bootstrap_options = "striped", full_width = F)
 ```
 
-From there, the chain will continue. If the model samples the "u" from the selection of next letters, then it's probable that the next letter after that would be an "s" and then stop after that - yielding "Brontosaur". If the model samples the "a", the following letter would likely be the stop character - yielding "Brontosaura".
+From there, the chain will continue. If the model samples the "u" from the selection of next letters, then it's probable that the next letter after that would be an "s" and then stop after that - yielding "Grontosaurus". If the model samples the "a" and then stops, the result would be "Grontosaura".
 
 #### Changing the Temperature
 
-One of the hyperparameters in the model is [temperature](https://cs.stackexchange.com/questions/79241/what-is-temperature-in-lstm-and-neural-networks-generally/79242#79242). A default value of 1 means that each letter is sampled with the default probabilities (e.g. 0.7 probability for "u" after "saur"). Decreasing this value below 1 increases the probabilities of the more likely letters, creating more conservative predictions. Temperature values above 1 work the opposite way, decreasing the relative chance of getting the more common next letters.
+One of the hyperparameters in the model is [temperature](https://cs.stackexchange.com/questions/79241/what-is-temperature-in-lstm-and-neural-networks-generally/79242#79242). A value of 1 means that each letter is sampled with the default probabilities (e.g. 45% chance for "u" after "saur"). Decreasing this value below 1 increases the probabilities of the more likely letters, creating more conservative predictions. Temperature values above 1 work the opposite way, moving all probabilities closer to each other.[^temp]
+
+[^temp]: Don't quote me on this explanation.
 
 ```{r brontosaur_temp, echo=FALSE, message=FALSE, warning=FALSE}
 saur_temp <- saur_completion %>% 
@@ -81,11 +87,11 @@ saur_temp <- saur_completion %>%
   select(-Probability) %>% 
   mutate_if(is.numeric, round, digits = 2)
 
-knitr::kable(saur_temp, "html", caption = "Probability of next letter after 'saur'") %>%
+knitr::kable(saur_temp, "html", caption = "Probability by Temperature of next letter after 'grontosaur'") %>%
   kable_styling(bootstrap_options = "striped", full_width = F)
 ```
 
-In the example above, as the temperature approaches 0, the probability of the model selecting "u" as the next letter climbs closer to 100%. On the other side of T=1, as the temperature approaches infinity, each option becomes equally likely. In the example with 5 possible characters, each has a 20% chance of being selected. In the full model with 27 characters, each has a 3.7% chance.
+In the example above, as the temperature approaches 0, the probability of the model selecting "u" as the next letter climbs closer to 100%. On the other side of T=1, as the temperature approaches infinity, each option becomes equally likely. In the example with 5 possible characters, each has a 20% chance of being selected. In the full model with 27 characters, each has a 3.7% (1/27) chance.
 
 For the results in this post[^ponysaurus], I sampled 500 new names from the model with temperatures varying from 0.5 to 1.5. 460 of those were unique, and `r length(kerasaurs)` of those not currently named dinosaurs. Other runs of the model with lower (more conservative) temperature values yielded more duplicates and more actual dinosaur names.
 
@@ -93,14 +99,14 @@ For the results in this post[^ponysaurus], I sampled 500 new names from the mode
 
 ### Phylogenetic tree
 
-I accomplished my goal - I came up with a handful of mostly believable dinosaur names. Now the fun part - creating nonsense phylogenetic trees to display the nonsense dinosaurs.
+I accomplished my goal (and learned something!): I tuned a deep learning model to come up with a handful of mostly believable dinosaur names. Now the fun part - creating nonsense phylogenetic trees to display the nonsense dinosaurs.
 
 To add some legitimacy to this project, I used it as an opportunity to practice my [functional programming](http://adv-r.had.co.nz/Functional-programming.html). In short, each tree is developed by:
 
 * Sampling N model-generated dinosaur names (16 is a good number)
-* Using the `adist()` function in base R to compare the names with the names of actual animals in the Phylopic database. An image of animal with a similar name as the generated name was selected to represent the animal graphically.
-* Assign each of the N dinosaurs an x-position (timeline) and y-position.
-* Create a bare tree linking each dinosaur with one to the left of it.
+* Using the `adist()` function in base R to compare the names with the names of actual animals in the Phylopic database. An image of an animal with a name similar to the generated name was selected to represent the animal graphically.
+* Assign each of the N dinosaurs an x-position and y-position.
+* Create a tree linking each dinosaur with one to the left of it.
 * Plot with `geom_path()` + `geom_raster()` + `geom_label()`.
 
 Check out the code on [GitHub](https://github.com/ryantimpe/Kerasaurs/blob/master/2_Names_Run%20Chart.R) to run your own trees!
@@ -143,6 +149,17 @@ kerasaurs %>%
 ```
 
 ```{r tree_run3, echo=FALSE, warning=FALSE, message=FALSE, fig.height=8}
+n_kerasaurs <- 15
+phylo_resolution <- 32
+
+kerasaurs %>% 
+  find_similar_phylopic(phylo) %>% 
+  create_tree_data( n_kerasaurs, phylo_resolution) %>% 
+  generate_tree(phylo_resolution)
+
+```
+
+```{r tree_run4, echo=FALSE, warning=FALSE, message=FALSE, fig.height=8}
 n_kerasaurs <- 15
 phylo_resolution <- 32
 
