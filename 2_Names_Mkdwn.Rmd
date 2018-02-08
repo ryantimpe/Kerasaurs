@@ -1,0 +1,35 @@
+---
+title: "2_Names_Mkdwn"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(png)
+
+kerasaurs <- read.csv("2_Names_Output.csv", stringsAsFactors = FALSE)[,1]
+phylo <- gsub(".png", "", list.files("PhyloPic")) #
+#!!! These imagaes are not on git... see github.com/ryantimpe/datasaurs for a copy of this folder
+
+#Drop some non-dino images
+phylo <- phylo[!(phylo %in% c("Hyaenodon"))]
+```
+
+### Deep learning with Keras
+
+I'm setting out to learn deep learning using the [keras](https://keras.rstudio.com/index.html) package for R. I'm excited to learn the theory and understand the guts of Tensor Flow, but while I was waiting for [the book](https://www.amazon.com/Deep-Learning-R-Francois-Chollet/dp/161729554X) to be delivered, I decided to get hands-on with a simple model. I figured it might be nice to have a working model that I can learn to optimized as I learn the finer details of the hyperparameters.
+
+### The Goal
+
+If you haven't noticed already, my brand is dinosaurs (with a splash of pop culture). **Can I build a deep learning to develop new dinosaur names?**
+
+### The Model
+
+I had it easy for this project. [Jonathon Nolis](https://twitter.com/skyetetra) published his project to come up with [offensive license plates](https://towardsdatascience.com/using-deep-learning-to-generate-offensive-license-plates-619b163ed937) in Arizona. He based his work off of the Keras example creating new [text based off Nietzsche’s writing](https://keras.rstudio.com/articles/examples/lstm_text_generation.html). He figured out that predicting letters from license plates isn't much different than predicted words from tomes. The next logical step from Nietzche and license plates is, of course, dinosaur names.
+
+### The Data
+
+I trained the model on `r length(kerasaurs)` genus names of dinosaurs, mosasaurs, ichthyosaurs, and plesiosaurs. The latter 3 are not dinosaurs, but I wanted to increase my training data set to include more extinct _saurs.
+
+I also have a database of `r length(phylo)` [silhouette images](https://github.com/ryantimpe/datasaurs/tree/master/PhyloPic) of dinosaurs and other animals from my [Datasaurs](https://twitter.com/datasaurs). These will be useful later in this post, and I hope for future deep learning projects.
