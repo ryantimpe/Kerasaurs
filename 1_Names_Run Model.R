@@ -52,4 +52,4 @@ result_df <- result %>%
   mutate(kerasaur = tools::toTitleCase(kerasaur))
 
 
-write.csv(result_df, "2_Names_Output_ptero.csv", row.names = F, quote = F)
+# write.csv(result_df, "2_Names_Output_ptero.csv", row.names = F, quote = F)
