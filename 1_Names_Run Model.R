@@ -41,7 +41,7 @@ iterate_model(model, characters, max_length, diversity, vectors, 50)
 
 # create the result
 result <- 
-  runif(500,0.2,0.8) %>% #randomly choose diversity for each plate
+  runif(500,0.5,1.5) %>% #randomly choose diversity for each plate
   map_chr(~ generate_saur(model, characters, max_length, .x))
 
 result_df <- result %>% 
@@ -52,4 +52,4 @@ result_df <- result %>%
   mutate(kerasaur = tools::toTitleCase(kerasaur))
 
 
-# write.csv(result_df, "2_Names_Output_ptero.csv", row.names = F, quote = F)
+write.csv(result_df, "Output/2_Names_Output_ptero_highertemp.csv", row.names = F, quote = F)
