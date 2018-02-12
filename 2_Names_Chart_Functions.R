@@ -73,6 +73,9 @@ create_tree_data <- function(dat, n_kerasaurs, phylo_resolution){
     sample_n(n_ker) %>% 
     #Deepness of tree - 1 is the starting genus, 4 are the final evolutions
     mutate(tree_x = sample(c(1, rep(2, 3), rep(3, 5), rep(4, rem_ker)), n_kerasaurs, replace = FALSE)) %>% 
+    # rowwise() %>% 
+    # mutate(tree_x = ifelse(kerasaur == "Ponysaurus", 1, max(2, tree_x))) %>% 
+    # ungroup() %>% 
     mutate(tree_x = ifelse(!(1 %in% tree_x) & row_number() == floor(n_ker/2), 1, tree_x)) %>% 
     #Vertical location on tree
     group_by(tree_x) %>% 

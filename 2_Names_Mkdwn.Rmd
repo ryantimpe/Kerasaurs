@@ -49,7 +49,7 @@ I had it easy for this project. [Jonathan Nolis](https://twitter.com/skyetetra) 
 
 #### An Explanation
 
-The links above lay out the logic and inner workings of the model in much more detail than I will here (as I said, I'm still a beginner with deep learning and neural networks). The algorithm used here for text prediction is [Recurrent Neural Networks (RNN)](https://medium.com/datalogue/attention-in-keras-1892773a4f22). Given a string a characters (or words), the algorithm chooses the next character (or word) based off the distribution of those sequences in the training data.
+The links above lay out the logic and inner workings of the model in much more detail than I will here (as I said, I'm still a beginner with deep learning and neural networks). The algorithm commonly used for text prediction is [Recurrent Neural Networks (RNN)](https://medium.com/datalogue/attention-in-keras-1892773a4f22). Given a string a characters (or words), the algorithm chooses the next character (or word) based off the distribution of those sequences in the training data.
 
 In this case, the training data is the list of those `r length(saurs)` extinct animal names. As you can imagine, among these names, the sequence "...saur..." shows up many times in that list.[^saurs] 
 

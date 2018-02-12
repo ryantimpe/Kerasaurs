@@ -26,10 +26,15 @@ phylo <- phylo[!(phylo %in% c("Hyaenodon", "Camelus ferus", "Coelodonta antiquit
 n_kerasaurs <- 16
 phylo_resolution <- 32
 
-kerasaurs %>% 
+n_kerasaurs %>% 
   find_similar_phylopic(phylo) %>% 
   create_tree_data( n_kerasaurs, phylo_resolution) %>% 
   generate_tree(phylo_resolution)
+
+# c("Ponysaurus", sample(kerasaurs, 20)) %>% 
+#   find_similar_phylopic(phylo) %>% 
+#   create_tree_data( n_kerasaurs, phylo_resolution) %>% 
+#   generate_tree(phylo_resolution)
 
 ###Version for Blog image
 
