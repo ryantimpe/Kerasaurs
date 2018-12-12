@@ -138,18 +138,31 @@ x_test_v <- x_test %>%  vectorize(characters, max_length)
 final_res <- test_data %>% 
   mutate(pred_raw = model %>% predict(x_test_v),
          pred = round(pred_raw*100),
-         pred_cat = ifelse(round(pred_raw, 0 ) == 1, "Pokemon", "Animal")) %>% 
+         pred_cat = ifelse(round(pred_raw, 0 ) == 1, "Pokemon", "Animal"),
+         conf = abs(pred_raw - 0.5) + 0.5,
+         conf2 = case_when(
+           conf > 0.8 ~ "3 - High",
+           conf > 0.6 ~ "2 - Med",
+           TRUE ~ "1 - Low"
+         )) %>% 
   mutate(validation = Category == pred_cat)
 
 final_res %>% 
   count(Category, validation) %>% 
-  mutate(perc = n / n())
+  group_by(Category) %>% 
+  mutate(perc = n / sum(n))
+
+final_res %>% 
+  count(Category, validation, conf2) %>% 
+  mutate(perc = n / sum(n)) %>% 
+  select(-n) %>% 
+  spread(conf2, perc, fill = 0)
 
 saveRDS(final_res, "Data/4b_Output_TestResults.RDS")
 save(model, file = "Data/4b_Models")
 
 # Make up a name ----
-made_up <- c("Electro", "Electrosaur", "Buttosaur")
+made_up <- c("Electro", "Electrosaur", "Buttosaur", "Buzzsaur")
 
 made_up_v <- made_up %>% 
   tolower() %>% 
@@ -157,3 +170,42 @@ made_up_v <- made_up %>%
   vectorize(characters, max_length)
 
 model %>% predict(made_up_v)
+
+# What about the generated animal and pokemon names?
+
+kerasaurs <- read_csv("Output/2_Names_Output_ptero_highertemp.csv") %>% 
+  mutate(Category = "Animal") %>% 
+  bind_rows(read_csv("Output/4a_Pokemon_Output.csv") %>% 
+              mutate(Category = "Pokemon")) %>% 
+  rename(Name = kerasaur) %>% 
+  arrange(Name)
+
+kerasaurs_pred <- kerasaurs$Name %>% 
+  tolower() %>% 
+  str_replace_all("[^[A-Za-z] ]", "") %>%
+  pad_data(max_length) %>%  
+  vectorize(characters, max_length)
+  
+kerasaurs2 <- kerasaurs %>% 
+  mutate(pred_raw = model %>% predict(kerasaurs_pred),
+         pred = round(pred_raw*100),
+         pred_cat = ifelse(round(pred_raw, 0 ) == 1, "Pokemon", "Animal"),
+         conf = abs(pred_raw - 0.5) + 0.5,
+         conf2 = case_when(
+           conf > 0.8 ~ "3 - High",
+           conf > 0.6 ~ "2 - Med",
+           TRUE ~ "1 - Low"
+         )) %>% 
+  mutate(validation = Category == pred_cat)
+
+kerasaurs2 %>% 
+  count(Category, validation) %>% 
+  group_by(Category) %>% 
+  mutate(perc = n / sum(n))
+
+
+kerasaurs2 %>% 
+  count(Category, validation, conf2) %>% 
+  mutate(perc = n / sum(n)) %>% 
+  select(-n) %>% 
+  spread(conf2, perc, fill = 0)

@@ -39,6 +39,7 @@ characters <- data %>%
   unique() %>% 
   sort()
 
+
 # make the vector/3D-array as the y and x data for keras
 vectors <- vectorize(data, characters, max_length)
 
