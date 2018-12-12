@@ -25,14 +25,13 @@ full_data <- tibble(Category = "Animal", Name = animals) %>%
   arrange(Name) %>% 
   distinct()
 
-
 train_data <- full_data %>% 
   sample_frac(0.8)
 
 test_data <- full_data %>% 
   anti_join(train_data)
 
-# Descriptive ---
+# Descriptive stats on Train data ---
 train_data %>% 
   count(Category)
 
@@ -40,20 +39,22 @@ train_data %>%
   group_by(Category) %>% 
   summarize(chars = mean(nchar(Name)))
 
-#Classification ----
+#Classification with Keras ----
 source("1_Names_Load Data Functions.R")
 source("1_Names_Model Functions.R")
 
 max_length <- 20
 
-data <- train_data$Name %>%
-  add_stop()
+pad_data <- function(dat, max_length){
+  dat %>% 
+    map_chr(function(x, max_length){
+      y <- str_c(paste0(rep("*", max(0, max_length - nchar(x))), collapse=""), x)
+      return(y)
+    }, max_length)
+}
 
 x_train <- train_data$Name %>% 
-  map_chr(function(x, max_length){
-    y <- str_c(paste0(rep("*", max(0, max_length - nchar(x))), collapse=""), x)
-    return(y)
-  }, max_length)
+  pad_data(max_length)
 
 characters <- x_train %>% 
   tokenize_characters(strip_non_alphanum = FALSE) %>% 
@@ -75,11 +76,14 @@ vectorize <- function(dat, characters, max_length){
   x
 }
 
-x_train_v <- vectorize(x_train, characters, max_length)
+x_train_v <- x_train %>% vectorize(characters, max_length)
 
 y_train <- as.numeric(train_data$Category == "Pokemon")
 
 vocab_size <- length(characters)
+
+#This model specification is borrowed heavily from the RStudio example
+# https://keras.rstudio.com/articles/tutorial_basic_text_classification.html
 
 model <- keras_model_sequential()
 model %>% 
@@ -127,14 +131,9 @@ history <- model %>% fit(
 #Predict test data ----
 
 x_test <- test_data$Name %>% 
-  map_chr(function(x, max_length){
-    y <- str_c(paste0(rep("*", max(0, max_length - nchar(x))), collapse=""), x)
-    return(y)
-  }, max_length)
+  pad_data(max_length)
 
-x_test_v <- vectorize(x_test, characters, max_length)
-
-y_train <- as.numeric(train_data$Category == "Pokemon")
+x_test_v <- x_test %>%  vectorize(characters, max_length)
 
 final_res <- test_data %>% 
   mutate(pred_raw = model %>% predict(x_test_v),
@@ -147,16 +146,14 @@ final_res %>%
   mutate(perc = n / n())
 
 saveRDS(final_res, "Data/4b_Output_TestResults.RDS")
+save(model, file = "Data/4b_Models")
 
-# Make up a name
-made_up <- "Electro"
+# Make up a name ----
+made_up <- c("Electro", "Electrosaur", "Buttosaur")
 
 made_up_v <- made_up %>% 
   tolower() %>% 
-  map_chr(function(x, max_length){
-    y <- str_c(paste0(rep("*", max(0, max_length - nchar(x))), collapse=""), x)
-    return(y)
-  }, max_length) %>% 
+  pad_data(max_length) %>% 
   vectorize(characters, max_length)
 
 model %>% predict(made_up_v)
