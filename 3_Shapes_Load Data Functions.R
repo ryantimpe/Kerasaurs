@@ -1,15 +1,10 @@
 #this file loads the packages and creates the functions that will be used in the model
-require(readr)
-require(stringr)
-require(dplyr)
-require(purrr)
-require(tokenizers)
-require(keras)
-
+library(tidyverse)
+library(png)
 # This function loads images of animals.
 # ... These images are big, so it will scale to the specified size
 # ... Want all images to be square, so pad the short size with  0s
-import_phylo <- function(phylo_name, facing = "L", side = 50){
+import_phylo <- function(phylo_name, facing = "L", side = 100){
   phylo_raw <- readPNG(paste0("PhyloPic/", phylo_name, ".png"))
   
   phylo <- phylo_raw[, , 4] #Only need the transparency matrix
@@ -22,14 +17,14 @@ import_phylo <- function(phylo_name, facing = "L", side = 50){
   
   phylo2 <- phylo %>% 
     as.tibble() %>% 
-    mutate(y = row_number()) %>% 
+    mutate(y = row_number()) %>%
+    mutate(y = max(y)-y +1) %>% 
     select(y, everything()) %>% 
     gather(x, value, 2:ncol(.)) %>% 
     mutate(x = as.numeric(substr(x, 2, 8))) %>% 
     group_by(x = x %/% divisor, y= y %/% divisor) %>% 
     summarize(value = mean(value)) %>% 
     ungroup() %>% 
-    # mutate(y = max(y) - y) %>%
     do( #Want all animals facing left for now
       if(facing == "R"){
         mutate(., x = max(x) - x + 1)
@@ -52,6 +47,14 @@ import_phylo <- function(phylo_name, facing = "L", side = 50){
     
 }
 
-test <- import_phylo("Allosaurus", "L", side=100)
+test <- import_phylo("Balaur", "L", side=80)
 ceiling(test)
-Matrix::image(-t(ceiling(test)))
+Matrix::image(-t(test))
+
+kerasaur_list <- readr::read_csv("DatasaurList.csv")
+
+train_ksaur <- kerasaur_list$Fauna %>% 
+  map2(kerasaur_list$Direction,
+       import_phylo)
+
+train_ksaur2 <- array(unlist(train_ksaur), dim = c(length(train_ksaur), 100, 100))
