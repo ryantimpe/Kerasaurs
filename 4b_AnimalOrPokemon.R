@@ -3,7 +3,7 @@
 ####
 
 library(tidyverse)
-library(tidytext)
+library(tokenizers)
 library(keras)
 
 set.seed(12334)
@@ -38,10 +38,6 @@ train_data %>%
 train_data %>% 
   group_by(Category) %>% 
   summarize(chars = mean(nchar(Name)))
-
-#Classification with Keras ----
-source("1_Names_Load Data Functions.R")
-source("1_Names_Model Functions.R")
 
 max_length <- 20
 
@@ -109,14 +105,14 @@ x_val <- x_train_v[validation_size, ]
 y_val <- y_train[validation_size]
 
 #Save these batches ----
-saveRDS(x_train, "SplitData/x_train.RDS")
-saveRDS(y_train, "SplitData/y_train.RDS")
-saveRDS(partial_x_train, "SplitData/partial_x_train.RDS")
-saveRDS(partial_y_train, "SplitData/partial_y_train.RDS")
-saveRDS(x_val, "SplitData/x_val.RDS")
-saveRDS(y_val, "SplitData/y_val.RDS")
-saveRDS(x_test, "SplitData/x_test.RDS")
-saveRDS(test_data$Category, "SplitData/y_test.RDS")
+# saveRDS(x_train, "SplitData/x_train.RDS")
+# saveRDS(y_train, "SplitData/y_train.RDS")
+# saveRDS(partial_x_train, "SplitData/partial_x_train.RDS")
+# saveRDS(partial_y_train, "SplitData/partial_y_train.RDS")
+# saveRDS(x_val, "SplitData/x_val.RDS")
+# saveRDS(y_val, "SplitData/y_val.RDS")
+# saveRDS(x_test, "SplitData/x_test.RDS")
+# saveRDS(test_data$Category, "SplitData/y_test.RDS")
 
 history <- model %>% fit(
   partial_x_train,
@@ -156,12 +152,13 @@ final_res %>%
   count(Category, validation, conf2) %>% 
   mutate(perc = n / sum(n)) %>% 
   select(-n) %>% 
-  spread(conf2, perc, fill = 0)
-
-saveRDS(final_res, "Data/4b_Output_TestResults.RDS")
-save(model, file = "Data/4b_Models")
+  spread(conf2, perc, fill = 0) 
+#
+# saveRDS(final_res, "Data/4b_Output_TestResults.RDS")
+# save(model, file = "Data/4b_Models")
 
 # Make up a name ----
+# load("Data/4b_Models")
 made_up <- c("Electro", "Electrosaur", "Buttosaur", "Buzzsaur")
 
 made_up_v <- made_up %>% 
@@ -170,6 +167,30 @@ made_up_v <- made_up %>%
   vectorize(characters, max_length)
 
 model %>% predict(made_up_v)
+
+m_prefix <- c("Allo", "Tyrani", "Ptero", "Electa",  "Diplo", "Pika")
+m_suffix <- c("saurus",  "tar",  "dactylus", "buzz", "docus", "chu")
+
+m_df <- expand.grid(pre = m_prefix, suf = m_suffix) %>% 
+  mutate(Name = tolower(paste0(pre, suf))) 
+
+
+m_df_v <- m_df$Name %>% 
+  tolower() %>% 
+  pad_data(max_length) %>% 
+  vectorize(characters, max_length)
+
+model %>% predict(m_df_v)
+
+m_df2 <- m_df %>% 
+  mutate(Actual = case_when(
+    Name %in% animals ~ "Animal",
+    Name %in% pokemon ~ "Pokemon",
+    TRUE ~ "No"
+  )) %>% 
+  mutate(pred_raw = model %>% predict(m_df_v))
+
+saveRDS(m_df2, "Output/PrefixSuffix_Results.RDS")
 
 # What about the generated animal and pokemon names?
 
