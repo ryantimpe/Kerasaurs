@@ -209,3 +209,5 @@ kerasaurs2 %>%
   mutate(perc = n / sum(n)) %>% 
   select(-n) %>% 
   spread(conf2, perc, fill = 0)
+
+saveRDS(kerasaurs2, "Data/4b_Output_Kerasaurs.RDS")
